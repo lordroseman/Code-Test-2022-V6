@@ -11,7 +11,7 @@ class BaseRepository
 {
 
     /**
-     * @var Model
+     * @var Models
      */
     protected $model;
 

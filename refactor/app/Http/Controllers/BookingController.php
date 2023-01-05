@@ -7,6 +7,7 @@ use DTApi\Http\Requests;
 use DTApi\Models\Distance;
 use Illuminate\Http\Request;
 use DTApi\Repository\BookingRepository;
+use App\Http\Requests\JobRequest;
 
 /**
  * Class BookingController
@@ -40,12 +41,11 @@ class BookingController extends Controller
             $response = $this->repository->getUsersJobs($user_id);
 
         }
-        elseif($request->__authenticatedUser->user_type == env('ADMIN_ROLE_ID') || $request->__authenticatedUser->user_type == env('SUPERADMIN_ROLE_ID'))
-        {
+        else if(in_array($request->__authenticatedUser->user_type, [env('ADMIN_ROLE_ID'), env('SUPERADMIN_ROLE_ID')]) {
             $response = $this->repository->getAll($request);
         }
-
-        return response($response);
+ 
+        return response()->json($response, 200);
     }
 
     /**
@@ -56,20 +56,19 @@ class BookingController extends Controller
     {
         $job = $this->repository->with('translatorJobRel.user')->find($id);
 
-        return response($job);
+        return response()->json($job, 200);
     }
 
     /**
-     * @param Request $request
+     * @param JobRequest $request
      * @return mixed
      */
-    public function store(Request $request)
+    public function store(JobRequest $request) // JobRequest $request
     {
         $data = $request->all();
-
         $response = $this->repository->store($request->__authenticatedUser, $data);
-
-        return response($response);
+     
+        return response()->json($response,  201);
 
     }
 
@@ -78,13 +77,13 @@ class BookingController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function update($id, Request $request)
+    public function update($id, JobRequest $request)
     {
-        $data = $request->all();
+        $data = $request->validated();
         $cuser = $request->__authenticatedUser;
-        $response = $this->repository->updateJob($id, array_except($data, ['_token', 'submit']), $cuser);
+        $response = $this->repository->updateJob($id, $data , $cuser);
 
-        return response($response);
+        return response($response, 200);
     }
 
     /**
